@@ -4,7 +4,7 @@
 
 ## Установка
 ```bash
-git clone https://github.com/username/password-manager.git
+git clone https://github.com/DMITRY1IE/password-manager
 cd password-manager
 pip install -r requirements.txt
 python run.py
