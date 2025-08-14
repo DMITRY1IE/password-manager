@@ -52,7 +52,89 @@ class VaultApp(tk.Tk):
         self.title("Менеджер паролей")
         self.geometry("780x520")
         self.resizable(True, True)
-
+        
+        # Цвета в стиле Telegram Dark
+        self.bg_color = "#17212B"
+        self.fg_color = "#FFFFFF"
+        self.entry_bg = "#232E3C"
+        self.button_bg = "#2B5278"
+        self.button_active = "#3D6D99"
+        self.select_color = "#2B5278"
+        self.accent_color = "#5288C1"
+        self.error_color = "#E15454"
+        
+        # Настройка темной темы
+        self.configure(bg=self.bg_color)
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+        
+        # Конфигурация стилей
+        self.style.configure('.', 
+                           background=self.bg_color, 
+                           foreground=self.fg_color,
+                           fieldbackground=self.entry_bg,
+                           insertcolor=self.fg_color)
+        
+        self.style.configure('TFrame', background=self.bg_color)
+        self.style.configure('TLabel', 
+                           background=self.bg_color, 
+                           foreground=self.fg_color,
+                           font=('Segoe UI', 10))
+        
+        self.style.configure('TEntry', 
+                           fieldbackground=self.entry_bg,
+                           foreground=self.fg_color,
+                           insertcolor=self.fg_color,
+                           bordercolor=self.entry_bg,
+                           lightcolor=self.entry_bg,
+                           darkcolor=self.entry_bg)
+        
+        self.style.configure('TButton', 
+                           background=self.button_bg,
+                           foreground=self.fg_color,
+                           bordercolor=self.button_bg,
+                           focusthickness=0,
+                           focuscolor='none',
+                           font=('Segoe UI', 10),
+                           padding=6)
+        self.style.map('TButton',
+                      background=[('active', self.button_active)],
+                      foreground=[('active', self.fg_color)])
+        
+        self.style.configure('Treeview', 
+                           background=self.entry_bg,
+                           foreground=self.fg_color,
+                           fieldbackground=self.entry_bg,
+                           rowheight=25,
+                           bordercolor=self.bg_color,
+                           lightcolor=self.bg_color,
+                           darkcolor=self.bg_color)
+        self.style.map('Treeview', 
+                      background=[('selected', self.select_color)],
+                      foreground=[('selected', self.fg_color)])
+        
+        self.style.configure('Treeview.Heading', 
+                           background=self.bg_color,
+                           foreground=self.fg_color,
+                           relief='flat',
+                           font=('Segoe UI', 10, 'bold'))
+        
+        self.style.configure('TScrollbar', 
+                           background=self.bg_color,
+                           troughcolor=self.bg_color,
+                           bordercolor=self.bg_color,
+                           arrowcolor=self.fg_color)
+        
+        self.style.configure('TMenubutton', 
+                           background=self.bg_color,
+                           foreground=self.fg_color)
+        self.style.configure('Vertical.TScrollbar', 
+                    background="#3498db",      # Цвет ползунка
+                    troughcolor="#232E3C",    # Цвет фона трека
+                    bordercolor="#232E3C",    # Цвет границы
+                    arrowcolor="#ecf0f1",    # Цвет стрелок (если есть)
+                    gripcount=0)              # Убираем стандартный "хват"
+        
         self.vault_path = VAULT_PATH
         self.blob = None
         self.fernet = None
@@ -65,17 +147,34 @@ class VaultApp(tk.Tk):
 
     # ---------- UI ----------
     def _build_menu(self):
-        m = tk.Menu(self)
-        filem = tk.Menu(m, tearoff=False)
+        m = tk.Menu(self, 
+                   bg="#2c3e50",  # Новый цвет фона
+                   fg="#ecf0f1",
+                   activebackground="#3498db",
+                   activeforeground="#ffffff",
+                   tearoff=0)
+    
+        filem = tk.Menu(m, 
+                   bg="#2c3e50",  # Темно-синий
+                   fg="#ecf0f1",
+                   activebackground="#3498db",
+                   activeforeground="#ffffff",
+                   tearoff=0)
         filem.add_command(label="Открыть сейф…", command=self.menu_open)
         filem.add_command(label="Создать сейф…", command=self.menu_new)
         filem.add_separator()
         filem.add_command(label="Выход", command=self.destroy)
         m.add_cascade(label="Файл", menu=filem)
 
-        toolsm = tk.Menu(m, tearoff=False)
+        toolsm = tk.Menu(m, 
+                        bg=self.entry_bg,
+                        fg=self.fg_color,
+                        activebackground=self.select_color,
+                        activeforeground=self.fg_color,
+                        tearoff=0)
         toolsm.add_command(label="Сменить мастер-пароль", command=self.change_master)
         m.add_cascade(label="Инструменты", menu=toolsm)
+        
         self.config(menu=m)
 
     def _build_ui(self):
@@ -133,7 +232,10 @@ class VaultApp(tk.Tk):
         status.pack(fill="x")
         self.status_var = tk.StringVar(value="Готово")
         ttk.Label(status, textvariable=self.status_var).pack(side="left")
-
+        sb = ttk.Scrollbar(mid, 
+                  orient="vertical", 
+                  command=self.tree.yview,
+                  style='Vertical.TScrollbar')  # Применяем кастомный стиль
     # ---------- Boot / Vault ----------
     def _bootstrap(self):
         if not os.path.exists(self.vault_path):
